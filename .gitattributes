@@ -1,0 +1,4 @@
+# Script shell chạy trong container Linux phải dùng LF
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.conf text eol=lf

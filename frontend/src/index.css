@@ -1,0 +1,489 @@
+@import "tailwindcss";
+
+/* Chế độ tối bật bằng class "dark" trên <html> (do public/theme-init.js và lib/theme.ts đặt), không phụ thuộc cài đặt hệ điều hành khi người dùng đã chọn */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Thanh điều hướng dạng hẹp (chỉ biểu tượng): iPad (768-1279px) luôn hẹp; laptop / PC (>= 1280px) hẹp khi người dùng
+ * bấm thu gọn (data-nav-collapsed trên <html>, xem lib/navCollapse.ts). Bộ chọn [data-nav-collapsed] cố ý không dùng :where()
+ * để thắng các class xl:* (vd xl:w-64, xl:pl-64).
+ */
+@custom-variant nav-compact {
+  @media (width >= 48rem) and (width < 80rem) {
+    @slot;
+  }
+  @media (width >= 80rem) {
+    [data-nav-collapsed] & {
+      @slot;
+    }
+  }
+}
+
+@theme {
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  /* Chữ nhỏ (text-xs) 13px thay vì 12px mặc định: nhãn, chip trạng thái, ghi chú dễ đọc hơn trên màn hình laptop / điện thoại */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: calc(1.125 / 0.8125);
+  /* Màu cam FPT */
+  --color-brand-50: #fff7ed;
+  --color-brand-100: #ffedd5;
+  --color-brand-200: #fed7aa;
+  --color-brand-400: #fb923c;
+  --color-brand-500: #f97316;
+  --color-brand-600: #ea580c;
+  --color-brand-700: #c2410c;
+
+  /*
+   * Chữ phụ và chữ màu trên nền nhạt đạt tương phản WCAG AA (>= 4.5:1) ở giao diện sáng.
+   * Cam 500 (nền nút, biểu tượng) giữ nguyên nhận diện FPT; cam 600/700 dùng cho chữ, link và trạng thái hover nên đậm hơn.
+   */
+  --color-slate-400: #64708a; /* chữ phụ / giờ / ghi chú: 4,97:1 trên trắng (mặc định #94a3b8 chỉ 2,6:1) */
+  --color-slate-500: #556176;
+  --color-brand-600: #c2410c;
+  --color-brand-700: #9a3412;
+  --color-orange-600: #c2410c;
+  --color-red-600: #c10007;
+  --color-emerald-600: #047857;
+  --color-teal-600: #0f766e;
+
+  /*
+   * Nền nút / tab / chip có chữ trắng (bg-cta, hover:bg-cta-hover): cam thương hiệu #f97316 theo lựa chọn của người dùng.
+   * Lưu ý: chữ trắng trên #f97316 chỉ đạt 2,8:1 (dưới WCAG AA 4,5:1); muốn đạt chuẩn thì đổi --color-cta sang #c2410c.
+   * Giữ nguyên ở giao diện tối (không khai báo lại trong .dark).
+   */
+  --color-cta: #f97316;
+  --color-cta-hover: #ea580c;
+
+  /*
+   * ===== Hệ thống thiết kế "Năng động & Phiêu lưu" (xem docs/DESIGN_SYSTEM.md) =====
+   * Bộ ba màu logo FPT làm điểm nhấn: cam (chính) + xanh dương + xanh lá. Mã cố định, không đảo ở giao diện tối.
+   * Dùng cho nền khối trang trí, biểu tượng, viền nhấn; chữ trắng chỉ đặt trên fpt-blue (đủ tương phản).
+   */
+  --color-fpt-blue: #0b6bcb;
+  --color-fpt-green: #3fae49;
+
+  /* Bo góc: thẻ thường / khối nổi bật (rounded-card, rounded-hero) */
+  --radius-card: 1.25rem;
+  --radius-hero: 1.75rem;
+
+  /* Bóng: card (nghỉ), pop (rê chuột / thẻ nổi bật), cta (nút cam) */
+  /* Thẻ nổi rõ khỏi nền: viền mảnh + bóng gần (sắc) + bóng xa (mềm). Giao diện tối khai báo lại trong .dark */
+  --shadow-card: 0 0 0 1px rgb(15 23 42 / 0.02), 0 1px 3px rgb(15 23 42 / 0.08), 0 8px 24px -10px rgb(15 23 42 / 0.16);
+  --shadow-pop: 0 2px 4px rgb(15 23 42 / 0.04), 0 16px 32px -12px rgb(249 115 22 / 0.35);
+  --shadow-cta: 0 6px 16px -6px rgb(249 115 22 / 0.55);
+
+  /* Xuất hiện: trượt lên + mờ dần (animate-rise); dùng với lớp stagger để các khối hiện lần lượt */
+  --animate-rise: rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* Viền cam lan tỏa 3 lần quanh thẻ được mở từ chỗ khác (vd ?task=<id> trên trang Nhiệm vụ) */
+  --animate-focus-pulse: focus-pulse 1.1s ease-out 3;
+  /* Lắc nhẹ biểu tượng khi rê chuột vào thẻ (group-hover:animate-wiggle) */
+  --animate-wiggle: wiggle 500ms ease-in-out;
+  /* Cột biểu đồ mọc lên từ đáy khi mở trang (WeeklyProgressChart) */
+  --animate-bar-grow: bar-grow 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* Chấm "đang soạn tin" của trợ lý AI: nảy lên + sáng dần, 3 chấm lệch nhịp nhau (animation-delay) */
+  --animate-typing-dot: typing-dot 1.2s ease-in-out infinite;
+  /* Nền bầu trời (components/ui/SkyBackdrop.tsx): tia nắng / quỹ đạo quay chậm, sao băng thỉnh thoảng vụt qua */
+  --animate-sky-spin: sky-spin 80s linear infinite;
+  --animate-shooting: shooting 9s ease-in 2s infinite;
+  /* Chuyển trang: nội dung hiện dần (chỉ opacity, fill backwards để KHÔNG giữ stacking context sau khi xong, nếu không modal bị kẹt dưới thanh tiêu đề) */
+  --animate-page-in: page-in 240ms ease-out backwards;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes sky-spin {
+    to {
+      rotate: 360deg;
+    }
+  }
+  @keyframes shooting {
+    0% {
+      opacity: 0;
+      translate: 0 0;
+    }
+    2% {
+      opacity: 1;
+    }
+    9%,
+    100% {
+      opacity: 0;
+      translate: -240px 170px;
+    }
+  }
+  @keyframes page-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes focus-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgb(249 115 22 / 0.55);
+    }
+    100% {
+      box-shadow: 0 0 0 14px rgb(249 115 22 / 0);
+    }
+  }
+  @keyframes typing-dot {
+    0%,
+    60%,
+    100% {
+      translate: 0 0;
+      opacity: 0.45;
+    }
+    30% {
+      translate: 0 -5px;
+      opacity: 1;
+    }
+  }
+  @keyframes bar-grow {
+    from {
+      scale: 1 0;
+    }
+    to {
+      scale: 1 1;
+    }
+  }
+  @keyframes wiggle {
+    0%,
+    100% {
+      rotate: 0deg;
+    }
+    30% {
+      rotate: -10deg;
+    }
+    60% {
+      rotate: 8deg;
+    }
+  }
+
+  /* Màu ngữ nghĩa: nền trang và nền thẻ / bảng / ô nhập. Đổi theo giao diện sáng - tối */
+  /* Nền trang xám xanh nhạt, thẻ trắng: đủ chênh để thẻ tách khỏi nền (trước #f8fafc gần như trùng màu thẻ) */
+  --color-page: #eef2f7;
+  --color-surface: #ffffff;
+
+  /* Minh họa trang Đăng nhập (components/auth/AuthHero.tsx) */
+  --animate-hero-float: hero-float 6s ease-in-out infinite;
+  --animate-hero-float-slow: hero-float 8s ease-in-out infinite;
+  --animate-hero-bob: hero-bob 3.5s ease-in-out infinite;
+  --animate-hero-glow: hero-glow 4s ease-in-out infinite;
+  --animate-hero-twinkle: hero-twinkle 2.4s ease-in-out infinite;
+  --animate-hero-bar: hero-bar 3s ease-in-out infinite;
+  --animate-hero-fill: hero-fill 4s ease-in-out infinite;
+
+  @keyframes hero-float {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: 0 -14px;
+    }
+  }
+  @keyframes hero-bob {
+    0%,
+    100% {
+      translate: 0 0;
+      rotate: 0deg;
+    }
+    50% {
+      translate: 0 -10px;
+      rotate: 12deg;
+    }
+  }
+  @keyframes hero-glow {
+    0%,
+    100% {
+      opacity: 0.6;
+      scale: 0.92;
+    }
+    50% {
+      opacity: 1;
+      scale: 1.08;
+    }
+  }
+  @keyframes hero-twinkle {
+    0%,
+    100% {
+      opacity: 0.3;
+      scale: 0.7;
+    }
+    50% {
+      opacity: 1;
+      scale: 1.1;
+    }
+  }
+  @keyframes hero-bar {
+    0%,
+    100% {
+      scale: 1 0.55;
+    }
+    50% {
+      scale: 1 1;
+    }
+  }
+  @keyframes hero-fill {
+    0% {
+      width: 20%;
+    }
+    60%,
+    100% {
+      width: 70%;
+    }
+  }
+
+  /* Chuyển tuần trên Lịch: nhãn tuần trượt vào, thông báo tuần mới hiện rồi mờ dần */
+  --animate-week-label: week-label 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-week-flash: week-flash 1000ms cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @keyframes week-label {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes week-flash {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -8px) scale(0.92);
+    }
+    18%,
+    70% {
+      opacity: 1;
+      transform: translate(-50%, 0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -4px) scale(0.98);
+    }
+  }
+}
+
+/*
+ * Giao diện tối: đảo thang màu thay vì viết lại từng component.
+ * Mọi class có sẵn (bg-slate-100, text-slate-500, border-red-200, bg-emerald-50...) tự đổi theo.
+ * Quy ước: nền nhạt (50-200) -> nền tối cùng tông; chữ đậm (600-900) -> chữ sáng; màu đặc 500 giữ nguyên.
+ * Cam thương hiệu (brand-500/600) giữ nguyên để nút và biểu tượng không đổi nhận diện.
+ */
+.dark {
+  color-scheme: dark;
+
+  /* Nền trang tối hơn, thẻ sáng hơn (trước #0a1020 / #111a2e quá gần nhau) */
+  --color-page: #070c19;
+  --color-surface: #141e35;
+  /* Bóng trên nền tối khó thấy → thêm vệt sáng mảnh ở mép trên + bóng sâu */
+  --shadow-card: inset 0 1px 0 rgb(255 255 255 / 0.05), 0 0 0 1px rgb(0 0 0 / 0.25), 0 10px 28px -12px rgb(0 0 0 / 0.75);
+
+  --color-slate-50: #0d1527;
+  --color-slate-100: #1a2540;
+  --color-slate-200: #2c3a5a;
+  --color-slate-300: #374563;
+  --color-slate-400: #8696b0;
+  --color-slate-500: #93a3bb;
+  --color-slate-600: #adbad0;
+  --color-slate-700: #cbd5e3;
+  --color-slate-800: #e2e8f0;
+  --color-slate-900: #f1f5f9;
+  --color-slate-950: #f8fafc;
+
+  --color-brand-50: #2b1608;
+  --color-brand-100: #3e1f0b;
+  --color-brand-200: #5e2d0f;
+  --color-brand-600: #ea580c;
+  --color-brand-700: #fdba74;
+
+  --color-red-50: #2c1217;
+  --color-red-100: #3b161d;
+  --color-red-200: #6b2330;
+  --color-red-300: #8f2d3c;
+  --color-red-600: #f87171;
+  --color-red-700: #fca5a5;
+  --color-red-800: #fecaca;
+
+  --color-amber-50: #2b2008;
+  --color-amber-100: #3a2a0a;
+  --color-amber-300: #7a5612;
+  --color-amber-600: #fbbf24;
+  --color-amber-700: #fcd34d;
+  --color-amber-800: #fde68a;
+
+  --color-orange-50: #2b1608;
+  --color-orange-100: #3e1f0b;
+  --color-orange-600: #fb923c;
+
+  --color-emerald-50: #0a2a22;
+  --color-emerald-100: #0f3a2d;
+  --color-emerald-200: #14543f;
+  --color-emerald-600: #34d399;
+  --color-emerald-700: #6ee7b7;
+
+  --color-blue-50: #0e1f3f;
+  --color-blue-600: #60a5fa;
+
+  --color-teal-50: #082a29;
+  --color-teal-600: #2dd4bf;
+
+  --color-pink-50: #2e1022;
+  --color-pink-600: #f472b6;
+
+  --color-violet-50: #1f1638;
+  --color-violet-100: #2c2150;
+  --color-violet-600: #a78bfa;
+  --color-violet-700: #c4b5fd;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-page text-slate-800 antialiased;
+  /* Hai vầng sáng cam / xanh rất nhạt ở góc trên: nền có chiều sâu mà không rối mắt */
+  background-image:
+    radial-gradient(60rem 30rem at 100% -10%, rgb(249 115 22 / 0.07), transparent 60%),
+    radial-gradient(50rem 28rem at -10% 0%, rgb(11 107 203 / 0.05), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Bề rộng thanh điều hướng hiện tại (0 trên điện thoại, 80px thanh hẹp, 256px đầy đủ): đặt đồ trang trí ngay bên phải thanh */
+:root {
+  --nav-w: 0px;
+}
+@media (width >= 48rem) {
+  :root {
+    --nav-w: 5rem;
+  }
+}
+@media (width >= 80rem) {
+  :root:not([data-nav-collapsed]) {
+    --nav-w: 16rem;
+  }
+}
+
+/* ===== Tiện ích của hệ thống thiết kế (docs/DESIGN_SYSTEM.md) ===== */
+
+/*
+ * Mã số / số điện thoại / mã môn: chữ số cùng độ rộng (thẳng cột trong bảng) + giãn chữ nhẹ, dùng font chính.
+ * Không dùng font-mono: Consolas / Courier trên Windows mảnh và lệch nét so với Be Vietnam Pro, cỡ nhỏ rất khó đọc.
+ */
+@utility text-data {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+
+/* Thẻ chuẩn: nền, viền, bo góc, bóng. Mọi khối nội dung nên dùng (hoặc dùng <Card>) */
+@utility surface-card {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-slate-200);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+/* Thẻ bấm được: nhấc lên + bóng cam khi rê chuột, ấn xuống khi bấm */
+@utility lift {
+  transition:
+    transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-pop);
+    border-color: color-mix(in oklab, var(--color-brand-500) 35%, var(--color-slate-200));
+  }
+  &:active {
+    transform: translateY(-1px) scale(0.99);
+  }
+}
+
+/* Họa tiết "bản đồ": lưới chấm, dùng trên nền cam (banner) hoặc nền nhạt (trạng thái trống) */
+@utility bg-trail {
+  background-image: radial-gradient(currentColor 1.2px, transparent 1.3px);
+  background-size: 18px 18px;
+}
+
+/* Chữ tô gradient cam → đỏ cam cho từ khóa nổi bật trong tiêu đề */
+@utility text-gradient {
+  background-image: linear-gradient(100deg, #f97316, #e8590c 55%, #d9480f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Các khối con hiện lần lượt (dùng ở Tổng quan và lưới thẻ). Tự tắt khi "Giảm chuyển động" (khối cuối file) */
+@utility stagger {
+  & > * {
+    animation: var(--animate-rise);
+  }
+  & > *:nth-child(2) {
+    animation-delay: 60ms;
+  }
+  & > *:nth-child(3) {
+    animation-delay: 120ms;
+  }
+  & > *:nth-child(4) {
+    animation-delay: 180ms;
+  }
+  & > *:nth-child(5) {
+    animation-delay: 240ms;
+  }
+  & > *:nth-child(n + 6) {
+    animation-delay: 300ms;
+  }
+}
+
+.dark body {
+  background-image:
+    radial-gradient(60rem 30rem at 100% -10%, rgb(249 115 22 / 0.1), transparent 60%),
+    radial-gradient(50rem 28rem at -10% 0%, rgb(11 107 203 / 0.1), transparent 60%);
+}
+
+/* Màn hình lớn: phóng nhẹ toàn bộ giao diện (mọi kích thước tính theo rem) để chữ không bị nhỏ trên PC 2K / 4K */
+@media (min-width: 1920px) {
+  html {
+    font-size: 106.25%;
+  }
+}
+@media (min-width: 2400px) {
+  html {
+    font-size: 118.75%;
+  }
+}
+
+/* Điện thoại / máy tính bảng: ô nhập dưới 16px làm iOS Safari tự phóng to trang khi chạm vào */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Người dùng bật "Giảm chuyển động" ở hệ điều hành */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

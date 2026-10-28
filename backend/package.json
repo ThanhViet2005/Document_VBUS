@@ -1,0 +1,13 @@
+{
+  "name": "uniplan-backend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-timeout=300000 tests/rls.test.mjs tests/webpush.test.mjs",
+    "vapid:generate": "node scripts/generate-vapid-keys.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10"
+  }
+}

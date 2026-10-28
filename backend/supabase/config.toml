@@ -1,0 +1,74 @@
+# Cấu hình Supabase CLI (chạy toàn bộ stack Supabase ở local bằng Docker: `npx supabase start`).
+# Các khóa không khai báo sẽ dùng giá trị mặc định của CLI.
+project_id = "uniplan"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+# Giới hạn số dòng mỗi request để tránh truy vấn quá nặng
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 17
+
+# Supavisor: pool kết nối Postgres cho các client kết nối trực tiếp (server, script, ORM)
+[db.pooler]
+enabled = true
+port = 54329
+pool_mode = "transaction"
+default_pool_size = 20
+max_client_conn = 200
+
+[db.seed]
+enabled = false
+
+[realtime]
+enabled = true
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173", "http://localhost:4173", "http://localhost:8080"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
+# Đăng nhập nhanh bằng Google (mọi tài khoản Gmail / Google Workspace).
+# Chạy local: đặt GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET trong môi trường trước khi `supabase start`.
+# Production: bật trong Dashboard → Authentication → Sign In / Providers → Google (xem DEPLOY.md).
+[auth.external.google]
+enabled = true
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_CLIENT_SECRET)"
+# Supabase tự dùng http://127.0.0.1:54321/auth/v1/callback khi để trống
+redirect_uri = ""
+skip_nonce_check = false
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+
+[functions.ai-chat]
+verify_jwt = true
+
+# Quản trị tài khoản: chỉ admin (kiểm tra trong function)
+[functions.admin-users]
+verify_jwt = true
+
+# Xác thực tự xử lý: cron dùng x-cron-secret, "gửi thử" dùng JWT người dùng
+[functions.send-reminders]
+verify_jwt = false
+
+# Email tổng hợp mỗi sáng (Brevo): cron dùng x-cron-secret, hủy nhận dùng mã bí mật (không đăng nhập), gửi thử dùng JWT
+[functions.send-email-digest]
+verify_jwt = false

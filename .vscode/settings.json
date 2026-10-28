@@ -1,0 +1,9 @@
+{
+  // Edge Functions của Supabase chạy trên Deno: bật Deno language server chỉ cho thư mục này
+  // (phần còn lại của repo vẫn dùng TypeScript thường). Cần extension "Deno" (denoland.vscode-deno).
+  "deno.enablePaths": ["backend/supabase/functions"],
+  "deno.lint": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  }
+}
